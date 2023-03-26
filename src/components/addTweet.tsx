@@ -6,12 +6,14 @@ type Props = {
   val: string;
   handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (e: FormEvent) => void;
+  isDisabled?: boolean;
 };
 export const AddTweet: FC<Props> = ({
   imgSrc,
   val,
   handleChange,
   handleSubmit,
+  isDisabled,
 }) => {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col items-start pl-4">
@@ -30,6 +32,7 @@ export const AddTweet: FC<Props> = ({
           onChange={handleChange}
           placeholder="what is happen?"
           className="rounded-sm border-none bg-transparent py-8 px-4 outline-none"
+          disabled={isDisabled}
         />
       </div>
       <button
