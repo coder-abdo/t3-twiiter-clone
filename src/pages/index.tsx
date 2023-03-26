@@ -1,7 +1,9 @@
 import { SignIn, SignInButton, useUser } from "@clerk/nextjs";
+import { TRPCClientError } from "@trpc/client";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { type ChangeEvent, type FormEvent, useState, Suspense } from "react";
+import { toast } from "react-hot-toast";
 import { AddTweet } from "~/components/addTweet";
 import Loader from "~/components/loader";
 import { PostsView } from "~/components/Posts.component";
@@ -20,6 +22,13 @@ const Home: NextPage = () => {
     onSuccess: () => {
       setTweet("");
       void ctx.posts.getAll.invalidate();
+    },
+    onError: (err) => {
+      if (err instanceof TRPCClientError) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        const message = JSON.parse(err.message)[0].message;
+        toast.error(message as string);
+      }
     },
   });
   const handleSubmit = (e: FormEvent) => {
