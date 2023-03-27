@@ -17,6 +17,7 @@ export const PostsView: FC<Props> = ({ auhtor, post }) => {
       <div className="flex flex-col">
         <h2 className="text-slate-300">
           <span className="pr-2">@{auhtor.username}</span>
+          {/* fix format time using date type instead of string type */}
           <span>. {formatTime(post.createdAt)}</span>
         </h2>
       </div>
