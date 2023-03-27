@@ -25,9 +25,17 @@ const Home: NextPage = () => {
     },
     onError: (err) => {
       if (err instanceof TRPCClientError) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        console.log(err.data.zodError.fieldErrors.content);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        const message = JSON.parse(err.message)[0].message;
-        toast.error(message as string);
+        const messageErrors = err.data.zodError.fieldErrors.content;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (messageErrors && messageErrors[0]) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+          toast.error(messageErrors[0]);
+        } else {
+          toast.error("something went wrong");
+        }
       }
     },
   });
