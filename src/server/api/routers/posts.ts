@@ -1,17 +1,11 @@
-import { type User } from "@clerk/nextjs/dist/api";
 import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { z } from "zod";
+import { filteredUsers } from "~/utils/filterUserInfo";
 import { createTRPCRouter, privateProcedure, publicProcedure } from "../trpc";
-const filteredUsers = (user: User) => {
-  return {
-    id: user.id,
-    username: user.username,
-    profileImageUrl: user.profileImageUrl,
-  };
-};
+
 // Create a new ratelimiter, that allows 3 requests per 1 minutes
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -48,7 +42,10 @@ export const postsRouter = createTRPCRouter({
   create: privateProcedure
     .input(
       z.object({
-        content: z.string().nonempty().max(44),
+        content: z
+          .string()
+          .nonempty("tweet should at least one character")
+          .max(44),
       })
     )
     .mutation(async ({ ctx, input }) => {
