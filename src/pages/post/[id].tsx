@@ -1,10 +1,17 @@
-import { type NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { useRouter } from "next/router";
-
-const PostPage: NextPage = () => {
-  const router = useRouter();
-  const { id } = router.query;
+import Loader from "~/components/loader";
+import { PostsView } from "~/components/Posts.component";
+import { api } from "~/utils/api";
+import { generateSSGHelper } from "~/utils/generateSSgHelper";
+type PageProps = {
+  postId: string;
+};
+const PostPage: NextPage<PageProps> = ({ postId }) => {
+  const { data: post, isLoading: isPostLoading } =
+    api.posts.getPostById.useQuery({
+      postId,
+    });
   return (
     <>
       <Head>
@@ -12,9 +19,34 @@ const PostPage: NextPage = () => {
         <meta name="post page" content="post page details" />
       </Head>
       <main className="flex h-screen justify-center">
-        <h1>post page {id}</h1>
+        {isPostLoading && (
+          <div className="flex items-center justify-center">
+            <Loader />
+          </div>
+        )}
+        {post && <PostsView post={post.post} auhtor={post.postUser} />}
       </main>
     </>
   );
+};
+export const getStaticProps: GetStaticProps = async (context) => {
+  const ssg = generateSSGHelper();
+  const postId = context.params?.id;
+  if (typeof postId !== "string") throw new Error("invalid slug");
+  await ssg.posts.getPostById.prefetch({
+    postId,
+  });
+  return {
+    props: {
+      trpcState: ssg.dehydrate(),
+      postId,
+    },
+  };
+};
+export const getStaticPaths = () => {
+  return {
+    paths: [],
+    fallback: "blocking",
+  };
 };
 export default PostPage;

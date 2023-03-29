@@ -1,14 +1,11 @@
 import type { GetStaticProps, NextPage } from "next";
-import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import superjson from "superjson";
 import Head from "next/head";
 import { PageLayout } from "~/components/layout";
-import { appRouter } from "~/server/api/root";
-import { prisma } from "~/server/db";
 import { api } from "~/utils/api";
 import Image from "next/image";
 import Loader from "~/components/loader";
 import { PostsView } from "~/components/Posts.component";
+import { generateSSGHelper } from "~/utils/generateSSgHelper";
 type PageProps = { username: string };
 const ProfilePage: NextPage<PageProps> = ({ username }) => {
   const { data, isLoading } = api.profile.getUserByUserName.useQuery({
@@ -59,11 +56,7 @@ const ProfilePage: NextPage<PageProps> = ({ username }) => {
   );
 };
 export const getStaticProps: GetStaticProps = async (context) => {
-  const ssg = createProxySSGHelpers({
-    router: appRouter,
-    ctx: { prisma, userId: null },
-    transformer: superjson,
-  });
+  const ssg = generateSSGHelper();
   const slug = context.params?.slug;
   if (typeof slug !== "string") throw new Error("invalid slug");
   const username = slug.replace("@", "");

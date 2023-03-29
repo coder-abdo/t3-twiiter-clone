@@ -13,6 +13,31 @@ const ratelimit = new Ratelimit({
   analytics: true,
 });
 export const postsRouter = createTRPCRouter({
+  getPostById: publicProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const post = await ctx.prisma.post.findUnique({
+        where: {
+          id: input.postId,
+        },
+      });
+      if (!post)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `post with ${input.postId} not found`,
+        });
+      const user = await clerkClient.users.getUser(post.autherId);
+      const postUser = {
+        id: user.id,
+        profileImageUrl: user.profileImageUrl,
+        username: user.username,
+      };
+      return { post, postUser };
+    }),
   getUserPosts: publicProcedure
     .input(
       z.object({
