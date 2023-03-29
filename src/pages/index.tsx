@@ -49,7 +49,7 @@ const Home: NextPage = () => {
   if (isPostsLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <Loader />;
+        <Loader />
       </div>
     );
   }
