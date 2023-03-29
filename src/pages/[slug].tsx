@@ -7,12 +7,24 @@ import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
 import { api } from "~/utils/api";
 import Image from "next/image";
+import Loader from "~/components/loader";
+import { PostsView } from "~/components/Posts.component";
 type PageProps = { username: string };
 const ProfilePage: NextPage<PageProps> = ({ username }) => {
   const { data, isLoading } = api.profile.getUserByUserName.useQuery({
     username,
   });
-  console.log(data, isLoading);
+  const { data: posts, isLoading: postsLoading } =
+    api.posts.getUserPosts.useQuery({
+      userId: data?.id as string,
+    });
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
   return (
     <>
       <Head>
@@ -28,7 +40,19 @@ const ProfilePage: NextPage<PageProps> = ({ username }) => {
             height={96}
             className="absolute bottom-0 left-0 -mb-[48px] ml-4 h-32 w-32 rounded-full border-2 border-black"
           />
-          <h1>user profile {data?.username}</h1>
+        </div>
+        <h1 className="text-md mt-16 mb-4 pl-3">@{data?.username}</h1>
+        <hr className="border-b-1 border-slate-100" />
+        {postsLoading && (
+          <div className="flex items-center justify-center">
+            <Loader />
+          </div>
+        )}
+        <div className="px-2 py-4">
+          {posts?.map((post) => (
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            <PostsView key={post.id} post={post} auhtor={data!} />
+          ))}
         </div>
       </PageLayout>
     </>

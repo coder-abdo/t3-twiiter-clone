@@ -13,6 +13,24 @@ const ratelimit = new Ratelimit({
   analytics: true,
 });
 export const postsRouter = createTRPCRouter({
+  getUserPosts: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.prisma.post.findMany({
+        where: {
+          autherId: input.userId,
+        },
+        take: 100,
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+      return posts;
+    }),
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.prisma.post.findMany({
       take: 10,

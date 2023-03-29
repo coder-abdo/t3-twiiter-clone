@@ -12,7 +12,7 @@ import { LoginUser } from "~/components/userLogin.component";
 import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
-  const { data } = api.posts.getAll.useQuery();
+  const { data, isLoading: isPostsLoading } = api.posts.getAll.useQuery();
   const user = useUser();
   const ctx = api.useContext();
   const [tweet, setTweet] = useState("");
@@ -46,6 +46,13 @@ const Home: NextPage = () => {
       content: tweet,
     });
   };
+  if (isPostsLoading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <Loader />;
+      </div>
+    );
+  }
   return (
     <>
       <Head>
